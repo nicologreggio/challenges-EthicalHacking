@@ -74,3 +74,54 @@ pkt = sniff(iface='br-407378364ccb', filter='icmp', prn=print_pkt)
 ---
 
 ## Task 1.2 Spoofing ICMP Packets
+- we can send an icmp request to our sniffer with a fake source address by simply setting it: 
+```bash
+ip = IP()
+ip.dst = '10.9.0.1' 
+icmp = ip/ICMP() 
+icmp.src='192.168.4.12' # or also ip.src='...' above
+sendp(icmp)
+```
+
+---
+
+## Task 1.3 Traceroute
+- we can craft our icmp packet:
+```bash
+a = IP()
+a.src='10.9.0.5'
+a.dst = '8.8.8.8' 
+a.ttl = 1
+b = ICMP() 
+icmp=a/b
+```
+- experimenting with different ttls we can see that with too small ones we're not able to reach the destination, this is what we get:
+   ```bash
+    ###[ IP ]### 
+     version   = 4
+     ihl       = 5
+     tos       = 0x0
+     len       = 56
+     id        = 0
+     flags     = 
+     frag      = 0
+     ttl       = 37
+     proto     = icmp
+     chksum    = 0x6d40
+     src       = 72.14.214.105
+     dst       = 10.9.0.5
+     \options   \
+    ###[ ICMP ]### 
+        type      = time-exceeded
+        code      = ttl-zero-during-transit
+        chksum    = 0x41f6
+  ```
+- instead with bigger ones (like 50) we can reach our destination, as we can see from the packet received:
+  ```bash
+    # [...]
+    src = 8.8.8.8
+  ```
+
+---
+
+## Task 1.4 Sniﬀing and-then Spoofing
