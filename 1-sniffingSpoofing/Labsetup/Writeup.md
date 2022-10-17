@@ -125,3 +125,4 @@ icmp=a/b
 ---
 
 ## Task 1.4 Sniﬀing and-then Spoofing
+> needed to use hwsrc and hwdst maybe to spoof arp
