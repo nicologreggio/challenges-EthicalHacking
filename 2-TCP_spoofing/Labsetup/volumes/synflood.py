@@ -14,4 +14,3 @@ while True:
     pkt[TCP].seq = getrandbits(32)                   # sequence number
     print(f"I'm sending {ip}")
     send(pkt, verbose = 3)
-    print("done")
