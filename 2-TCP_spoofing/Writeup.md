@@ -1,7 +1,11 @@
 # TCP Attacks
+### how to get iface
+`ifconfig | grep '10.9.0' -B1 | head -1 | cut -f1 -d ':'`
 ## Containers setup
 - run in each the following line replacing `role` with what the container is, just to recognize them easier from the prompt
   - ```echo 'PS1="role | $PS1"' >> ~/.bashrc```
+
+---
 
 # Task 1: SYN Flooding Attack
 ## 1.1 $-$ With python
@@ -11,6 +15,7 @@
 | see queue size for connections | `sysctl net.ipv4.tcp_max_syn_backlog` |
 | edit queue size | `sysctl -w net.ipv4.tcp_max_syn_backlog=80` |
 | check usage of queue (look for SYN-RECV, number of half-opened connections) | `netstat -nat` |
+| count opened connections | `netstat -tna \| grep SYN_RECV \| wc -l` |
 
 ### On SYN cookie countermeasue
 enabled by default, we can change it:
@@ -52,3 +57,17 @@ $ sysctl -w net.ipv4.tcp_syncookies=1 # turn on SYN cookie
   Trying 10.9.0.5...
   telnet: Unable to connect to remote host: Connection timed out
   ```
+
+---
+
+## 1.2 $-$ with C
+- Once compiled we can execute the C version of the synflood program, we can immediately notice, by monitoring the queue on the victim side as we did earlier, that the rate of which new connections are opened is much bigger.
+- Also we can see that just 1 instance of this program is enough to flood the victim in a way that we cannot even open a telnet connection.
+
+---
+
+## 1.3 $-$ Enable the SYN Cookie Countermeasure
+- with the countermeasure enabled we can immediately connect via telnet even with the flooding programs running. Thus the protection works very well.
+
+---
+
