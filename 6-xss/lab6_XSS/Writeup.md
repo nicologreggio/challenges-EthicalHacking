@@ -24,7 +24,17 @@
 | charlie      | seedcharlie
 | samy         | seedsamy
 
+---
 
-
-
-
+# Task 1 $-$ Posting a Malicious Message to Display an Alert Window
+- It's sufficient to amberd an inline script with an alert in the brief description of the profile, so that whenever someone sees us will get the alert
+  ```js
+  // in the brief description
+  hello <script>alert('ciao')</script>
+  ```
+---  
+# Task 2 $-$ Posting a Malicious Message to Display Cookies
+- just do it:
+  `<script>alert(document.cookie);</script>`
+---
+# Task 3 $-$ Stealing Cookies from the Victim’s Machine
