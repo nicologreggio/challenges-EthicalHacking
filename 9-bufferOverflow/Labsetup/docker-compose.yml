@@ -18,6 +18,8 @@ services:
             context: ./bof-containers
             args:
                 LEVEL: L2
+        volumes:
+          - .:/code
         image: seed-image-bof-server-2
         container_name: server-2-10.9.0.6
         tty: true
