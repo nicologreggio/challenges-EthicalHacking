@@ -111,4 +111,78 @@ push "/bin"
 ---
 
 # Task 1.c - Providing Arguments for System Calls
-- 
+- we took these steps:
+  1. push 0 and the shell instruction, then save the stack pointer to ebx
+     ```asm
+      xor  eax, eax 
+      push eax          ; Use 0 to terminate the string
+      push "//sh"       ; [1]
+      push "/bin"
+      mov  ebx, esp     ; Get the string address
+     ```
+  2. push another 0 (which will be the termination of the command string)
+     ```asm
+      push eax 
+     ```
+  3. save "la" in esi with two placeholders at the end (in order to have 4 bytes) and then replace those with 0s with the shift. then push esi onto the stack (we don't need to save esp now because this part is the continuation of the ls command, argv[2])
+     ```asm
+      mov esi, "la##"
+      shl esi, 16
+      shr esi, 16 ; "la00"
+      push esi
+     ```
+  4. push "ls -" onto the stack and save the pointer in ecx
+     ```asm
+      push "ls -"
+      mov ecx, esp
+     ```
+  5. save "-c" in eax with two placeholders at the end, again replaced by 0s with shift. Then push it and save its pointer to edi
+     ```asm
+      mov eax, "-c##"
+      shl eax, 16
+      shr eax, 16 ; "-c00"
+      push eax
+      mov edi, esp
+     ```
+  6. push another 0 to terminate the whole string (argv[3])
+     ```asm
+      xor eax, eax
+      push eax
+     ```
+  7. push the pointers to the various argv and save the pointer of the beginning of argv in ecx
+     ```asm
+      push ecx
+      push edi
+      push ebx          
+      mov  ecx, esp     
+     ```
+  8. terminate the program
+     ```asm
+      ; For environment variable 
+      xor  edx, edx     ; No env variables      [4]
+
+      ; Invoke execve()
+      xor  eax, eax     ; eax = 0x00000000
+      mov   al, 0x0b    ; eax = 0x0000000b
+      int 0x80
+     ```
+- the stack situation at the is:
+  ```
+    0
+    //sh
+    /bin <- ebx
+    0
+    la00
+    ls - <- ecx
+    -c00 <- edi
+    0 <- edx
+    0
+    ecx -> ls -la
+    edi -> -c
+    ebx -> /bin/sh
+  ```
+
+---
+
+# Task 1.d - Providing Environment Variables for execve()
+- the base mechanism for this task is similar to the previous one: we have to prepare the array containing the environment variables

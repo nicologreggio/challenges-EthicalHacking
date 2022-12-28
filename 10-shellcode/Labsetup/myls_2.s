@@ -22,23 +22,28 @@ section .text
       ;mov esi, esp
 
       ; we want "ls -"
-      push "ls -"
+      mov ecx, "ls -"
+      push ecx
       mov ecx, esp
       
       ; we want "-c  "
       mov eax, "-c##"
       shl eax, 16
       shr eax, 16 ; "-c00"
+      ; mov al, "l" ; "-c0l"
       push eax
       mov edi, esp
       
       
       xor eax, eax
       push eax
-      ;mov edx, esp
-      ;push esi
-      push ecx
+      push [esp-4]
       push edi
+      
+      ; argv[1]
+      ; xor  eax, eax 
+      ; push eax
+      ; push edx
 
       ; argv[0] = "/bin/sh"
       push ebx          ; argv[0] points "/bin//sh"   [3]
