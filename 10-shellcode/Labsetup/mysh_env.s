@@ -9,7 +9,6 @@ section .text
       push "/usr"
       mov  ebx, esp     ; Get the string address
 
-      ; Construct the argument array argv[]
       ; env[3] = 0          // 0 marks the end of the array
       push eax          
 

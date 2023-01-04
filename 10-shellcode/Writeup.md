@@ -166,7 +166,7 @@ push "/bin"
       mov   al, 0x0b    ; eax = 0x0000000b
       int 0x80
      ```
-- the stack situation at the is:
+- the stack situation at the end is:
   ```
     0
     //sh
@@ -185,4 +185,85 @@ push "/bin"
 ---
 
 # Task 1.d - Providing Environment Variables for execve()
-- the base mechanism for this task is similar to the previous one: we have to prepare the array containing the environment variables
+- the base mechanism for this task is similar to the previous one: we have to prepare the array containing the environment variables, keep track of the pointer to each env[n] and push everything correctly. So:
+  1. Push 0, the instruction to get the environment and the termination of the env array:
+    ```asm
+      xor  eax, eax 
+      push eax          ; Use 0 to terminate the string
+      push "/env"
+      push "/bin"       
+      push "/usr"
+      mov  ebx, esp     ; Get the string address
+
+      ; env[3] = 0          // 0 marks the end of the array
+      push eax     
+    ```
+  2. push env[2]="cccc=1234" exploiting the shift trick, since we need to add 9 bytes. Then save the stack pointer in `edi`
+    ```asm
+      push eax
+      mov edi, "4###"
+      shl edi, 24
+      shr edi, 24
+      push edi
+      push "=123"
+      push "cccc"
+      mov edi, esp
+    ```
+  3. push env[1] = "bbb=5678" and save stack pointer to `esi`
+    ```asm
+      push eax
+      push "5678"
+      push "bbb="
+      mov esi, esp
+    ```
+  4. push env[0] = "aaa=1234" and save pointer to edx
+    ```asm
+      push eax
+      push "1234"
+      push "aaa="
+      mov edx, esp
+    ```
+  5. push argv, which in this case only contains the env command, and save pointer in `ecx`
+    ```asm
+      push eax
+      push ebx          ; argv[0] points "/usr/bin/env"   [3]
+      mov  ecx, esp     ; Get the address of argv[]
+    ```
+  6. push the pointers to the environment variables and then save stack pointer in `edx`
+    ```asm
+      ; For environment variable 
+      push eax
+      push edi
+      push esi
+      push edx
+
+      mov edx, esp
+    ```
+  7. terminate the program
+    ```asm
+      ; Invoke execve()
+      xor  eax, eax     ; eax = 0x00000000
+      mov   al, 0x0b    ; eax = 0x0000000b
+      int 0x80
+    ```
+- the final situation of the stack is as follows:
+  ```
+    /env
+    /bin
+    /usr <- ebx
+    0
+    4000
+    =123
+    cccc <- edi
+    0
+    5678
+    bbb= <- esi
+    1234
+    aaa= <- edx
+    0
+    ebx -> argv[0] <- ecx
+    0
+    edi -> env[2]
+    esi -> env[1]
+    edx -> env[0] <- edx
+  ```
