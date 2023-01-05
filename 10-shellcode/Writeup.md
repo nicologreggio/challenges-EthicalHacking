@@ -267,3 +267,8 @@ push "/bin"
     esi -> env[1]
     edx -> env[0] <- edx
   ```
+
+---
+
+# Task 2 $-$ Using Code Segment
+- 
