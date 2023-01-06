@@ -271,4 +271,44 @@ push "/bin"
 ---
 
 # Task 2 $-$ Using Code Segment
-- 
+- ...
+
+---
+
+# Task 3 $-$ Writing 64-bit Shellcode
+- Basically, starting from the provided example we can change the existing command and replace the final part with `bas`. Then we just need to add the `h` at the end, to do so we can either:
+  1. use a temporary register to save the `h` with 7 placeholders and then remove them with the shift trick:
+    ```asm
+      mov rbx, 'h#######'
+      shl rbx, 56
+      shr rbx, 56
+      push rbx
+    ```
+  2. or just push the `h` alone
+    ```asm
+      push 'h'
+    ```
+- so the complete code can be as follow:
+  ```asm
+    section .text
+      global _start
+        _start:
+          xor rdx, rdx
+          push rdx
+          ;push 'h'             ; alternative version
+          mov rbx, 'h#######'
+          shl rbx, 56
+          shr rbx, 56
+          push rbx
+          mov rax, '/bin/bas'
+          push rax
+          mov rdi, rsp
+          push rdx
+          push rdi
+          mov rsi, rsp
+          xor rax, rax
+          mov al, 0x3b
+          syscall
+  ```
+- to execute it we need to adapt our running script:
+  - `nasm -f elf64 mtbash_64.s -o mtbash_64.o && ld mtbash_64.o -o mtbash_64 && ./mtbash_64`
