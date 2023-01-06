@@ -6,11 +6,15 @@ section .text
 		one:
 			pop ebx 					; [1]
 			xor eax, eax
-			push eax
-			push eax
-			push "a=11"
+			push eax ; env[3]=0
+			push eax ; terminates env[2] string
+			push "a=11" ; env[2]
 			mov esi, esp
 			push eax
+			push "b=22"
+			mov edi, esp
+			push eax
+			push edi
 			push esi
 			mov edx, esp
 			;mov [ebx+4], al
