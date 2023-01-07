@@ -6,33 +6,21 @@ section .text
 		one:
 			pop ebx 					; [1]
 			xor eax, eax
-			push eax ; env[3]=0
-			push eax ; terminates env[2] string
-			push "a=11" ; env[2]
-			mov esi, esp
+			push eax ; env[2]=0
+			push eax ; terminates env[1] string
+			push "a=11" ; env[1]
+			mov esi, esp ; saves pointer to env[1]
+			push eax ; terminates env[0] string
+			push "b=22" ; env[0]
+			mov edi, esp ; saves pointer to env[0]
 			push eax
-			push "b=22"
-			mov edi, esp
-			push eax
+			; push pointers to env and save in edx beginning of env
 			push edi
 			push esi
 			mov edx, esp
-			;mov [ebx+4], al
-			;mov [ebx+17], al
-			;mov [ebx+22], ax
-			;mov [ebx+7], al		; save 0x00 (1 byte) to memory at address ebx+7
-			;mov [ebx+8], eax 	; save ebx (4 bytes) to memory at address ebx+8
-			;mov [ebx+12], eax	; save eax (4 bytes) to memory at address ebx+12
-			;lea ecx, [ebx+8] 	; let ecx = ebx + 8
-			;xor ecx, ecx
-			;lea edx, [ebx+13]
 			
-			mov al,  0x0b     ; usual stuff
+			mov al,  0x0b  
 			int 0x80
 		two:
 			call one
-			; /usr/bin/env a=11 b=22 
-			;db '/usr/bin/env*a=11*b=22*'  ; [2]
 			db '/usr/bin/env'
-			;db '/usr/bin/env*a=11**'
-			;db '/bin/sh*AAAABBBB'  ; [2]
