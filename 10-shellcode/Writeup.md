@@ -1,6 +1,8 @@
 # Lab 10 - Shellcode
 ## Setup with Docker
 - we defined our custom image in the [Dockerfile](./Labsetup/Dockerfile) starting from the seed-ubuntu image and adding all the required tools
+- to build the image run
+  - `docker build -t eh-10-shellcode .`
 - to create a container from it cd into `Labsetup` and run
   - ```docker run -v `pwd`:/code --name eh-10-shellcode -it eh-10-shellcode  bash```
 
