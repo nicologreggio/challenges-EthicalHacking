@@ -10,8 +10,8 @@ section .text
 			push eax ; env[2]=0
 			push eax ; terminate env[1]
 			push dword [ebx+13] ; push env[1]
-			push eax ; terminate env[1]
-			push dword [ebx+17] ; push env[1]
+			push eax ; terminate env[0]
+			push dword [ebx+17] ; push env[0]
 			
 			push eax
 			lea esi, [esp+4]

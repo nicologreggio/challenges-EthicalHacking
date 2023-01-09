@@ -1,4 +1,8 @@
 # Lab 10 - Shellcode
+## Setup with Docker
+- we defined our custom image in the [Dockerfile](./Labsetup/Dockerfile) starting from the seed-ubuntu image and adding all the required tools
+- to create a container from it cd into `Labsetup` and run
+  - ```docker run -v `pwd`:/code --name eh-10-shellcode -it eh-10-shellcode  bash```
 
 # Task 1.a - the entire process
 - compile to object code: `nasm -f elf32 mysh.s -o mysh.o`
@@ -412,3 +416,4 @@ push "/bin"
   ```
 - to execute it we need to adapt our running script:
   - `nasm -f elf64 mtbash_64.s -o mtbash_64.o && ld mtbash_64.o -o mtbash_64 && ./mtbash_64`
+  - `nasm -f elf64 mybash_64.s -o mybash_64.o && ld mybash_64.o -o mybash_64 && ./mybash_64`
