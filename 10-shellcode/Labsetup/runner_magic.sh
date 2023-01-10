@@ -8,7 +8,7 @@ fi
 f=`basename -s .s $1`
 if [ -f $f.s ]
 then
-  nasm -f elf32 $f.s -o $f.o && ld --omagic -m elf_i386 $f.o -o $f && ./$f
+  nasm -f elf32 $f.s -o $f.o && ld --omagic -m elf_i386 $f.o -o $f.out && ./$f.out
 else
   echo "There is no $f.s file in here"
   exit 1
