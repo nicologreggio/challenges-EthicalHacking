@@ -9,6 +9,7 @@ docker exec -ti seed-attacker bash
 ```
 
 ### inside attacker container
+- use `ifconfig` to check the existing interfaces
 - looked for all interfaces, found'br-407378364ccb'
 - check promisc mode
   - `ip -d link show br-407378364cc`
