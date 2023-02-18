@@ -20,6 +20,7 @@ all_interfaces=[
     'br-563e54b25150',
     'br-894020cbb969',
     'br-a6188c8defb6',
+    'br-dbb96bc033b7',
     'docker0',
     'eth0',
     'lo',
@@ -35,4 +36,4 @@ all_interfaces=[
 # sniff only tcp packets from that host on that port
 # pkt = sniff(iface='br-407378364ccb', filter='host 10.9.0.5 and tcp and src port 23', prn=print_pkt)
 
-pkt = sniff(iface='br-0a1deadc53a1', filter='icmp', prn=print_and_spoof)
+pkt = sniff(iface='br-dbb96bc033b7', filter='icmp', prn=print_and_spoof)
