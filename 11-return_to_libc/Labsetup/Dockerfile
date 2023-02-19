@@ -1,0 +1,6 @@
+FROM ubuntu:20.04
+
+RUN apt update && apt upgrade -y
+RUN apt install -y build-essential netcat python3 nano nasm xxd gdb
+
+CMD bash

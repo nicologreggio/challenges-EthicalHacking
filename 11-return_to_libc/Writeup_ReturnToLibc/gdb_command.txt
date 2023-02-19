@@ -1,0 +1,6 @@
+break main
+run
+p system
+p execv
+p exit
+quit
