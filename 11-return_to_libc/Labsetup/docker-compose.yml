@@ -1,0 +1,10 @@
+version: '3'
+services:
+  machine:
+    image: custom-eh
+    build: 
+      context: .
+    volumes:
+      - .:/code
+    tty: true
+    command: bash
