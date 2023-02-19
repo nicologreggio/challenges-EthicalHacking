@@ -1,0 +1,1 @@
+cmd_/home/seed/Desktop/meltdown/Labsetup/MeltdownKernel.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/seed/Desktop/meltdown/Labsetup/MeltdownKernel.ko /home/seed/Desktop/meltdown/Labsetup/MeltdownKernel.o /home/seed/Desktop/meltdown/Labsetup/MeltdownKernel.mod.o;  true
